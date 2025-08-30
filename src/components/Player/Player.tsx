@@ -115,7 +115,6 @@ export const Player = ({
 type PlayerProps = (typeof PlayerADP)[number] & {
   tier: number;
   picked: boolean;
-  adp: number;
   handlePicked: () => void;
   handleAddTierBreak: () => void;
 };

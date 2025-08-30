@@ -27,23 +27,14 @@ const Container = () => {
     })
   );
   const { picks, setPicks, isDraftMode } = useContext(DraftContext);
-  const [players, setPlayers] = useState(
-    PlayerADP.map((player, idx) => ({
-      ...player,
-      adp: idx + 1,
-    }))
-  );
+  const [playerOrder, setPlayerOrder] = useState<number[]>([]);
   const [tierBreaks, setTierBreaks] = useState<number[]>([]);
   useEffect(() => {
     if (localStorage.getItem("players"))
-      setPlayers(
-        JSON.parse(
-          localStorage.getItem("players")!
-        ) as ((typeof PlayerADP)[number] & {
-          tierBreak: boolean;
-          adp: number;
-        })[]
-      );
+      setPlayerOrder(JSON.parse(localStorage.getItem("players")!) as number[]);
+    else {
+      setPlayerOrder(PlayerADP.map((p) => p.id));
+    }
     if (localStorage.getItem("tierBreaks")) {
       const tiers = JSON.parse(localStorage.getItem("tierBreaks")!) as number[];
       setTierBreaks(tiers.sort((a, b) => a - b));
@@ -54,13 +45,16 @@ const Container = () => {
     const { active, over } = event;
     if (!over) return;
     if (active.id !== over.id) {
-      const oldIndex = players.findIndex((player) => player.id === active.id);
-      const newIndex = players.findIndex((player) => player.id === over.id);
-      const newPlayers = [...players];
-      newPlayers.splice(oldIndex, 1);
-      newPlayers.splice(newIndex, 0, players[oldIndex]);
-      localStorage.setItem("players", JSON.stringify(newPlayers));
-      setPlayers(newPlayers);
+      setPlayerOrder((player) => {
+        console.log({ active, over });
+        const oldIndex = player.indexOf(active.id as number);
+        const newIndex = player.indexOf(over.id as number);
+        const newOrder = [...player];
+        newOrder.splice(oldIndex, 1);
+        newOrder.splice(newIndex, 0, active.id as number);
+        localStorage.setItem("players", JSON.stringify(newOrder));
+        return newOrder;
+      });
     }
   };
 
@@ -86,16 +80,20 @@ const Container = () => {
       </div>
       {isDraftMode ? (
         <div>
-          {players.map((player, idx) => (
-            <Player
-              {...player}
-              picked={picks.includes(player.id)}
-              key={player.id}
-              handlePicked={() => handlePicked(player.id)}
-              handleAddTierBreak={() => handleAddTierBreak(idx)}
-              tier={tierBreaks.findIndex((tier) => tier === idx) + 1}
-            />
-          ))}
+          {playerOrder.map((id, playerOrder) => {
+            const player = PlayerADP.find((p) => p.id === id);
+            if (!player) return null;
+            return (
+              <Player
+                {...player}
+                picked={picks.includes(id)}
+                key={id}
+                handlePicked={() => handlePicked(id)}
+                handleAddTierBreak={() => handleAddTierBreak(playerOrder)}
+                tier={tierBreaks.findIndex((tier) => tier === playerOrder) + 1}
+              />
+            );
+          })}
         </div>
       ) : (
         <DndContext
@@ -104,19 +102,25 @@ const Container = () => {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={players}
+            items={playerOrder}
             strategy={verticalListSortingStrategy}
           >
-            {players.map((player, idx) => (
-              <Player
-                {...player}
-                picked={picks.includes(player.id)}
-                key={player.id}
-                handlePicked={() => handlePicked(player.id)}
-                handleAddTierBreak={() => handleAddTierBreak(idx)}
-                tier={tierBreaks.findIndex((tier) => tier === idx) + 1}
-              />
-            ))}
+            {playerOrder.map((id, playerOrder) => {
+              const player = PlayerADP.find((p) => p.id === id);
+              if (!player) return null;
+              return (
+                <Player
+                  {...player}
+                  picked={picks.includes(id)}
+                  key={id}
+                  handlePicked={() => handlePicked(id)}
+                  handleAddTierBreak={() => handleAddTierBreak(playerOrder)}
+                  tier={
+                    tierBreaks.findIndex((tier) => tier === playerOrder) + 1
+                  }
+                />
+              );
+            })}
           </SortableContext>
         </DndContext>
       )}

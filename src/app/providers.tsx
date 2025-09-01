@@ -9,6 +9,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { getSleeperPicks } from "./actions";
+import PlayerADP from "@/data/playeradp.json";
 
 export const DraftContext = createContext<{
   picks: number[];
@@ -18,6 +20,13 @@ export const DraftContext = createContext<{
   resetPicks: () => void;
   setIsDraftMode: Dispatch<SetStateAction<boolean>>;
   togglePlayerMarker: (id: number, value: "value" | "avoid") => void;
+  positionFilter: "" | "QB" | "WR" | "RB" | "TE" | "DST";
+  handleSetPositionFilter: (
+    position: "" | "QB" | "WR" | "RB" | "TE" | "DST"
+  ) => void;
+  draftId?: string;
+  setDraftId: Dispatch<SetStateAction<string>>;
+  syncPicks: () => void;
 }>({
   picks: [],
   isDraftMode: true,
@@ -26,16 +35,25 @@ export const DraftContext = createContext<{
   resetPicks: () => void 0,
   setIsDraftMode: () => {},
   togglePlayerMarker: () => {},
+  positionFilter: "",
+  handleSetPositionFilter: () => {},
+  draftId: "",
+  setDraftId: () => {},
+  syncPicks: () => {},
 });
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
+  const [positionFilter, setPositionFilter] = useState<
+    "" | "QB" | "WR" | "RB" | "TE" | "DST"
+  >("");
   const [picks, setPicks] = useState<number[]>([]);
   const [isDraftMode, setIsDraftMode] = useState(false);
   const resetPicks = () => setPicks([]);
   const [playerMarkers, setPlayerMarkers] = useState<
     Record<number, "value" | "avoid">
   >({});
+  const [draftId, setDraftId] = useState<string>("");
 
   useEffect(() => {
     if (localStorage.getItem("picks"))
@@ -64,6 +82,27 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const handleSetPositionFilter = (
+    position: "" | "QB" | "WR" | "RB" | "TE" | "DST"
+  ) => {
+    setPositionFilter((activePostion) =>
+      activePostion === position ? "" : position
+    );
+  };
+
+  const syncPicks = async () => {
+    const picks = await getSleeperPicks(draftId);
+    const matchedPicks = PlayerADP.filter((player) =>
+      picks?.some(
+        (pick) =>
+          `${pick.metadata.first_name} ${pick.metadata.last_name}` ===
+          player.playerName
+      )
+    ).map((player) => player.id);
+    localStorage.setItem("picks", JSON.stringify(matchedPicks));
+    setPicks(matchedPicks);
+  };
+
   return (
     <DraftContext
       value={{
@@ -74,6 +113,11 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
         setIsDraftMode,
         playerMarkers,
         togglePlayerMarker,
+        positionFilter,
+        handleSetPositionFilter,
+        draftId,
+        setDraftId,
+        syncPicks,
       }}
     >
       <HeroUIProvider navigate={router.push}>{children}</HeroUIProvider>

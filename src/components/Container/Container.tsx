@@ -18,6 +18,7 @@ import { useContext, useEffect, useState } from "react";
 import PlayerADP from "@/data/playeradp.json";
 import { Player } from "../Player/Player";
 import { DraftContext } from "@/app/providers";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const Container = () => {
   const sensors = useSensors(
@@ -26,7 +27,13 @@ const Container = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  const { picks, setPicks, isDraftMode } = useContext(DraftContext);
+  const {
+    picks,
+    setPicks,
+    isDraftMode,
+    positionFilter,
+    handleSetPositionFilter,
+  } = useContext(DraftContext);
   const [playerOrder, setPlayerOrder] = useState<number[]>([]);
   const [tierBreaks, setTierBreaks] = useState<number[]>([]);
   useEffect(() => {
@@ -40,6 +47,30 @@ const Container = () => {
       setTierBreaks(tiers.sort((a, b) => a - b));
     }
   }, []);
+  useHotkeys("f", () => {
+    console.log("f pressed");
+  });
+  useHotkeys("q", () => {
+    handleSetPositionFilter("QB");
+  });
+  useHotkeys("d", () => {
+    handleSetPositionFilter("DST");
+  });
+  useHotkeys("t", () => {
+    handleSetPositionFilter("TE");
+  });
+  useHotkeys("r", () => {
+    handleSetPositionFilter("RB");
+  });
+  useHotkeys("w", () => {
+    handleSetPositionFilter("WR");
+  });
+  useHotkeys("a", () => {
+    handleSetPositionFilter("");
+  });
+  useHotkeys("enter", () => {
+    console.log("enter pressed");
+  });
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -59,7 +90,11 @@ const Container = () => {
   };
 
   const handlePicked = (id: number) => {
-    setPicks((prevPicks) => [...prevPicks, id]);
+    setPicks((prevPicks) => {
+      const picks = [...prevPicks, id];
+      localStorage.setItem("picks", JSON.stringify(picks));
+      return picks;
+    });
   };
 
   const handleAddTierBreak = (idx: number) => {
@@ -83,6 +118,10 @@ const Container = () => {
           {playerOrder.map((id, playerOrder) => {
             const player = PlayerADP.find((p) => p.id === id);
             if (!player) return null;
+
+            // filter
+            const position = player.pos.replace(/\d+/g, "");
+            if (positionFilter && position !== positionFilter) return null;
             return (
               <Player
                 {...player}

@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { DraftContext } from "@/app/providers";
 import { FaBomb, FaRocket } from "react-icons/fa";
 
-const positions: Record<string, string> = {
+export const positions: Record<string, string> = {
   QB: "rgba(239, 116, 161, 0.8)",
   RB: "#8ff2cacc",
   WR: "#56c9f8cc",

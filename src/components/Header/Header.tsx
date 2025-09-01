@@ -1,12 +1,26 @@
 "use client";
 
 import { DraftContext } from "@/app/providers";
-import { Button, Navbar, NavbarBrand, NavbarContent } from "@heroui/react";
+import {
+  Button,
+  Input,
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+} from "@heroui/react";
 import { useContext } from "react";
 
 const Header = () => {
-  const { picks, resetPicks, isDraftMode, setIsDraftMode } =
-    useContext(DraftContext);
+  const {
+    picks,
+    resetPicks,
+    isDraftMode,
+    setIsDraftMode,
+    positionFilter,
+    draftId,
+    setDraftId,
+    syncPicks,
+  } = useContext(DraftContext);
   return (
     <Navbar>
       <NavbarBrand>Draft sheet</NavbarBrand>
@@ -23,6 +37,11 @@ const Header = () => {
           color={isDraftMode ? "success" : "primary"}
         >
           {isDraftMode ? "Draft Mode" : "Edit Mode"}
+        </Button>
+        <div>{positionFilter}</div>
+        <Input label="Draft ID" value={draftId} onValueChange={setDraftId} />
+        <Button disabled={!draftId} onPress={() => syncPicks()}>
+          Sync picks
         </Button>
       </NavbarContent>
     </Navbar>

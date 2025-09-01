@@ -15,7 +15,11 @@ const nextConfig = {
     ],
   },
   transpilePackages: ["@heroui/react", "@heroui/theme"],
-  webpack: (webpackConfig) => {
+  webpack: (webpackConfig: {
+    resolve: {
+      extensionAlias: { ".cjs": string[]; ".js": string[]; ".mjs": string[] };
+    };
+  }) => {
     webpackConfig.resolve.extensionAlias = {
       ".cjs": [".cts", ".cjs"],
       ".js": [".ts", ".tsx", ".js", ".jsx"],

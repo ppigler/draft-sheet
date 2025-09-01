@@ -29,6 +29,9 @@ dependencies:
   react-dom:
     specifier: 19.1.0
     version: 19.1.0(react@19.1.0)
+  react-hotkeys-hook:
+    specifier: ^5.1.0
+    version: 5.1.0(react-dom@19.1.0)(react@19.1.0)
   react-icons:
     specifier: ^5.5.0
     version: 5.5.0(react@19.1.0)
@@ -6242,6 +6245,16 @@ packages:
     dependencies:
       react: 19.1.0
       scheduler: 0.26.0
+    dev: false
+
+  /react-hotkeys-hook@5.1.0(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-GCNGXjBzV9buOS3REoQFmSmE4WTvBhYQ0YrAeeMZI83bhXg3dRWsLHXDutcVDdEjwJqJCxk5iewWYX5LtFUd7g==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
     dev: false
 
   /react-icons@5.5.0(react@19.1.0):
